@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GeosLibrary.Models;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -30,7 +31,7 @@ namespace GeosLibrary.Models
             return remover.GetResult();
         }
 
-        public static UPoint[] RemoveHoles(UPoint[] shell, List<UPoint[]>holes, double areaTolerance)
+        public static UPoint[] RemoveHoles(UPoint[] shell, List<UPoint[]> holes, double areaTolerance)
         {
             var geometryFactory = new GeometryFactory();
 
@@ -58,28 +59,34 @@ namespace GeosLibrary.Models
             return ExtractPointsFromCleanedGeometryIncludingHoles(cleanedGeometry);
         }
 
-        private static UPoint[] ExtractPointsFromCleanedGeometryIncludingHoles(Geometry cleanedGeometry)
+        public static UPoint[] ExtractPointsFromCleanedGeometryIncludingHoles(Geometry cleanedGeometry)
         {
             if (!(cleanedGeometry is Polygon cleanedPolygon))
                 throw new ArgumentException("Input geometry is not a polygon.");
 
             List<UPoint> points = new List<UPoint>();
 
-            // Add shell
             var cleanedShell = cleanedPolygon.ExteriorRing.Coordinates;
             points.AddRange(Array.ConvertAll(cleanedShell, p => new UPoint(p.X, p.Y)));
 
             foreach (var cleanedHole in cleanedPolygon.InteriorRings)
             {
-                // Add special point to indicate a jump
-                points.Add(new UPoint(double.NaN, double.NaN));
-
-                // Add hole
                 var holeCoordinates = cleanedHole.Coordinates;
-                points.AddRange(Array.ConvertAll(holeCoordinates, p => new UPoint(p.X, p.Y)));
-            }
 
+                // Add the first point of the shell to return to it after drawing the hole
+                points.Add(points[0]);
+
+                // Reverse the order of points for the hole
+                var reversedHoleCoordinates = holeCoordinates.Reverse().ToArray();
+                points.AddRange(Array.ConvertAll(reversedHoleCoordinates, p => new UPoint(p.X, p.Y)));
+
+
+                // Return to the first point of the shell to close the path
+                points.Add(points[0]);
+
+            }
             return points.ToArray();
         }
+
     }
 }
