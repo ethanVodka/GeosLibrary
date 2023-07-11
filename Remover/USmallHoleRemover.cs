@@ -59,7 +59,7 @@ namespace GeosLibrary.Models
             return ExtractPointsFromCleanedGeometryIncludingHoles(cleanedGeometry);
         }
 
-        public static UPoint[] ExtractPointsFromCleanedGeometryIncludingHoles(Geometry cleanedGeometry)
+        private static UPoint[] ExtractPointsFromCleanedGeometryIncludingHoles(Geometry cleanedGeometry)
         {
             if (!(cleanedGeometry is Polygon cleanedPolygon))
                 throw new ArgumentException("Input geometry is not a polygon.");
