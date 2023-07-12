@@ -88,5 +88,55 @@ namespace GeosLibrary.Models
             return points.ToArray();
         }
 
+        public static (Point[] Shell, List<Point[]> Holes) ExtractPointsFromGeometry(Geometry cleanedGeometry)
+        {
+            if (cleanedGeometry is Polygon cleanedPolygon)
+            {
+                var cleanedShell = cleanedPolygon.ExteriorRing.Coordinates;
+                Point[] shellPoints = Array.ConvertAll(cleanedShell, p => new Point((int)p.X, (int)p.Y));
+
+                var cleanedHoles = cleanedPolygon.InteriorRings;
+                List<Point[]> holePointsList = new List<Point[]>();
+
+                foreach (var ring in cleanedHoles)
+                {
+                    Point[] holePoints = Array.ConvertAll(ring.Coordinates, p => new Point((int)p.X, (int)p.Y));
+                    holePointsList.Add(holePoints);
+                }
+
+                return (shellPoints, holePointsList);
+            }
+            else
+            {
+                throw new ArgumentException("Input geometry is not a polygon.");
+            }
+
+            /*             
+                 #include "stdafx.h"
+                 #include <msclr/marshal_cppstd.h>  // std::string と System::String の変換に使用
+                 using namespace System;
+                 using namespace NetTopologySuite::Geometries;
+                 
+                 // C++/CLIのメイン関数
+                 int main(array<System::String^>^ args)
+                 {
+                     // C++/CLIから呼び出すために、C#の関数を呼び出す
+                     Geometry^ cleanedGeometry = ...;  // クリーニングされたジオメトリを取得するコード
+                 
+                     // C++/CLIからC#の関数を呼び出す
+                     std::pair<array<Point>^, List<array<Point>^>^> result;
+                     result = ExtractPointsFromGeometry(cleanedGeometry);
+                 
+                     // C++の配列に変換する
+                     array<Point>^ shellPoints = result.first;
+                     List<array<Point>^>^ holePointsList = result.second;
+                 
+                     // C++の処理を続ける...
+                     // (shellPointsとholePointsListを使用した処理)
+                 
+                     return 0;
+                 }
+             */
+        }
     }
 }
