@@ -96,6 +96,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GeosClipper\PolygonProcessor.cs" />
     <Compile Include="Models\PolygonSet.cs" />
     <Compile Include="Models\UPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
